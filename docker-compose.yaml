@@ -83,7 +83,7 @@ services:
       ACCESS_LOG: "true"
 
       # CORS (allow all for development)
-      CORS_ORIGINS: "*"
+      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
 
       # Python optimizations
       PYTHONUNBUFFERED: 1
@@ -116,27 +116,3 @@ volumes:
 networks:
   ecommerce_network_dev:
     driver: bridge
-
-# =============================================================================
-# USAGE INSTRUCTIONS
-# =============================================================================
-#
-# Start all services:
-#   docker-compose up --build
-#
-# Start in detached mode:
-#   docker-compose up -d
-#
-# View logs:
-#   docker-compose logs -f api
-#
-# Stop services:
-#   docker-compose down
-#
-# Remove volumes (clean start):
-#   docker-compose down -v
-#
-# Check service health:
-#   docker-compose ps
-#
-# =============================================================================

@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Column, Float, DateTime, Enum, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -8,7 +9,7 @@ from models.enums import DeliveryMethod, Status
 class OrderModel(BaseModel):
     __tablename__ = "orders"
 
-    date = Column(DateTime, index=True)
+    date = Column(DateTime, index=True, default=datetime.utcnow, nullable=False)
     total = Column(Float)
     delivery_method = Column(Enum(DeliveryMethod), index=True)
     status = Column(Enum(Status), index=True)

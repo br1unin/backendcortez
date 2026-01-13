@@ -18,6 +18,8 @@ class ReviewModel(BaseModel):
     rating = Column(Float, nullable=False)
     comment = Column(String)
     product_id = Column(Integer, ForeignKey('products.id_key'), index=True)
+    user_id = Column(Integer, ForeignKey('users.id_key'), index=True)
     product = relationship(
         'ProductModel', back_populates='reviews', lazy='select',
         )
+    user = relationship('UserModel', lazy='select')

@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from config.redis_config import get_redis_client
+from utils.security import decode_access_token
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +62,16 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         if not self.enabled or not self.redis_client:
             return await call_next(request)
 
+        # Skip rate limiting for CORS preflight
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         # Skip rate limiting for health check endpoint
         if request.url.path == "/health_check":
+            return await call_next(request)
+
+        # Skip rate limiting for admin requests
+        if self._is_admin_request(request):
             return await call_next(request)
 
         # Get client IP
@@ -197,6 +206,15 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             logger.error(f"Error getting remaining requests for {client_ip}: {e}")
             return self.calls
+
+    def _is_admin_request(self, request: Request) -> bool:
+        auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
+        if not auth_header or not auth_header.lower().startswith("bearer "):
+            return False
+
+        token = auth_header.split(" ", 1)[1].strip()
+        payload = decode_access_token(token)
+        return bool(payload and payload.get("is_admin"))
 
 
 # Alternative: Decorator-based rate limiter for specific endpoints

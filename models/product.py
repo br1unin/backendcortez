@@ -32,7 +32,8 @@ class ProductModel(BaseModel):
 
     name = Column(String, index=True)
     price = Column(Float, index=True)
-    stock = Column(Integer, default=0, nullable=False, index=True)  # ✅ Added index
+    stock = Column(Integer, default=0, nullable=False, index=True)
+    image_url = Column(String, nullable=True)
     category_id = Column(Integer, ForeignKey('categories.id_key'), index=True)
 
     category = relationship(
@@ -52,3 +53,6 @@ class ProductModel(BaseModel):
         cascade='all, delete-orphan',
         lazy='select',
     )
+
+
+

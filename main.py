@@ -8,6 +8,7 @@ import os
 import uvicorn
 import logging
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
@@ -28,7 +29,12 @@ from controllers.client_controller import ClientController
 from controllers.order_controller import OrderController
 from controllers.order_detail_controller import OrderDetailController
 from controllers.product_controller import ProductController
-from controllers.review_controller import ReviewController
+from controllers.review_controller import router as review_controller
+from controllers.upload_controller import router as upload_controller
+from controllers.auth_controller import router as auth_controller
+from controllers.payment_method_controller import router as payment_method_controller
+from controllers.order_history_controller import router as order_history_controller
+from controllers.address_me_controller import router as address_me_controller
 from controllers.health_check import router as health_check_controller
 from repositories.base_repository_impl import InstanceNotFoundError
 
@@ -58,15 +64,21 @@ def create_fastapi_app() -> FastAPI:
             content={"message": str(exc)},
         )
 
+    uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+    fastapi_app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
     client_controller = ClientController()
     fastapi_app.include_router(client_controller.router, prefix="/clients")
 
+    fastapi_app.include_router(order_history_controller, prefix="/orders")
     order_controller = OrderController()
     fastapi_app.include_router(order_controller.router, prefix="/orders")
 
     product_controller = ProductController()
     fastapi_app.include_router(product_controller.router, prefix="/products")
 
+    fastapi_app.include_router(address_me_controller, prefix="/addresses")
     address_controller = AddressController()
     fastapi_app.include_router(address_controller.router, prefix="/addresses")
 
@@ -76,11 +88,14 @@ def create_fastapi_app() -> FastAPI:
     order_detail_controller = OrderDetailController()
     fastapi_app.include_router(order_detail_controller.router, prefix="/order_details")
 
-    review_controller = ReviewController()
-    fastapi_app.include_router(review_controller.router, prefix="/reviews")
+    fastapi_app.include_router(review_controller, prefix="/reviews")
+    fastapi_app.include_router(upload_controller, prefix="/upload")
 
     category_controller = CategoryController()
     fastapi_app.include_router(category_controller.router, prefix="/categories")
+
+    fastapi_app.include_router(auth_controller, prefix="/auth")
+    fastapi_app.include_router(payment_method_controller, prefix="/billing_methods")
 
     fastapi_app.include_router(health_check_controller, prefix="/health_check")
 

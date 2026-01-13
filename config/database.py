@@ -15,6 +15,8 @@ from models.order import OrderModel  # noqa
 from models.order_detail import OrderDetailModel  # noqa
 from models.product import ProductModel  # noqa
 from models.review import ReviewModel  # noqa
+from models.user import UserModel  # noqa
+from models.payment_method import PaymentMethodModel  # noqa
 
 # Get logger (logging is configured in main.py)
 logger = logging.getLogger(__name__)

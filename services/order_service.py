@@ -56,13 +56,13 @@ class OrderService(BaseServiceImpl):
             logger.error(f"Bill with id {schema.bill_id} not found")
             raise InstanceNotFoundError(f"Bill with id {schema.bill_id} not found")
 
-        # Set creation date if not provided
-        if schema.date is None:
-            schema.date = datetime.utcnow()
+        # Ensure date is persisted even if not explicitly provided
+        data = schema.model_dump(exclude_unset=True)
+        if not data.get("date"):
+            data["date"] = datetime.utcnow()
 
-        # Create order
         logger.info(f"Creating order for client {schema.client_id}")
-        return super().save(schema)
+        return self.repository.save(OrderModel(**data))
 
     def update(self, id_key: int, schema: OrderSchema) -> OrderSchema:
         """

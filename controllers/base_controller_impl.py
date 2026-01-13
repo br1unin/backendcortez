@@ -19,7 +19,8 @@ class BaseControllerImpl(BaseController):
         self,
         schema: Type[BaseSchema],
         service_factory: Callable[[Session], 'BaseService'],
-        tags: List[str] = None
+        tags: List[str] = None,
+        write_dependency: Callable | None = None,
     ):
         """
         Initialize the controller with dependency injection support.
@@ -32,6 +33,7 @@ class BaseControllerImpl(BaseController):
         self.schema = schema
         self.service_factory = service_factory
         self.router = APIRouter(tags=tags or [])
+        self.write_dependency = write_dependency
 
         # Register all CRUD endpoints with proper dependency injection
         self._register_routes()
@@ -61,6 +63,7 @@ class BaseControllerImpl(BaseController):
         @self.router.post("/", response_model=self.schema, status_code=status.HTTP_201_CREATED)
         async def create(
             schema_in: self.schema,
+            _auth=Depends(self.write_dependency) if self.write_dependency else None,
             db: Session = Depends(get_db)
         ):
             """Create a new record."""
@@ -71,6 +74,7 @@ class BaseControllerImpl(BaseController):
         async def update(
             id_key: int,
             schema_in: self.schema,
+            _auth=Depends(self.write_dependency) if self.write_dependency else None,
             db: Session = Depends(get_db)
         ):
             """Update an existing record."""
@@ -80,6 +84,7 @@ class BaseControllerImpl(BaseController):
         @self.router.delete("/{id_key}", status_code=status.HTTP_204_NO_CONTENT)
         async def delete(
             id_key: int,
+            _auth=Depends(self.write_dependency) if self.write_dependency else None,
             db: Session = Depends(get_db)
         ):
             """Delete a record."""
